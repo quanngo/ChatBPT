@@ -170,10 +170,10 @@ export default class EditPost extends React.Component {
           />
           <Button title="Chọn hình" onPress={this.chooseFile.bind(this)} />
 
-          <TouchableOpacity style={styles.btnSignin}
+          <TouchableOpacity style={styles.btnUpdate}
             onPress={() => this.submit()}>
             <TextInput
-              style={styles.signinText} editable={false}>
+              style={styles.updateText} editable={false}>
               Cập nhật
               </TextInput>
           </TouchableOpacity>
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     width: 400,
     height: 45
   },
-  btnSignin: {
+  btnUpdate: {
     marginTop: 25,
     width: 260,
     height: 45,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'black'
   },
-  signinText: {
+  updateText: {
     fontSize: 18,
     color: 'white'
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, RefreshControl, Button, StyleSheet, FlatList, Text, View, Vibration, TextInput, TouchableOpacity, Image } from 'react-native';
+import { Dimensions, Modal, RefreshControl, Button, StyleSheet, FlatList, Text, View, Vibration, TextInput, TouchableOpacity, Image } from 'react-native';
 import { ListAllProviderInfobyBuildingID } from '../../APIs/APIclass';
 import { SearchBar } from 'react-native-elements';
 import Swipeout from 'react-native-swipeout'
@@ -54,7 +54,7 @@ class FlatListItem extends React.Component {
                             flex: 1,
                             flexDirection: 'row',
                             // backgroundColor: this.props.index % 2 == 0 ? 'mediumseagreen': 'tomato'                
-                            backgroundColor: 'mediumseagreen'
+                            backgroundColor: '#fbedff'
                         }}>
                             <Image
                                 source={{ uri: "data:image/png;base64, " + this.props.item.image }}
@@ -118,11 +118,14 @@ export default class HomepageR extends React.Component {
 
         this.setState({ refreshing: true });
         ListAllProviderInfobyBuildingID(BuildingID).then(res => {
-            let services = JSON.parse(res);
-            this.setState({ data: services });
-            this.setState({ refreshing: false });
+            if (res.toString() !== "false") {
 
-            this.arrayholder = services;
+                let services = JSON.parse(res);
+                this.setState({ data: services });
+                this.setState({ refreshing: false });
+
+                this.arrayholder = services;
+            }
         })
             .catch((error) => {
                 //this.setState({ data: [] });
@@ -148,12 +151,14 @@ export default class HomepageR extends React.Component {
         });
     }
     render() {
+        const WIDTH = Dimensions.get('window').width;
+
         return (
-            <View style={{ flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <MenuButton navigation={this.props.navigation} />
-                <View style={styles.up}>
-                    {/* <Image style={styles.img}
-                        source={{ uri: "data:image/png;base64, " + Image }} /> */}
+                {/* <View style={styles.up}>
+                    <Image style={styles.img}
+                        source={{ uri: "data:image/png;base64, " + Image }} />
 
                     <Text style={styles.screenname}>Danh sách dịch vụ</Text>
 
@@ -170,7 +175,31 @@ export default class HomepageR extends React.Component {
                     onChangeText={text => this.searchFilterFunction(text)}
                     autoCorrect={false}
                     value={this.state.value}
+                /> */}
+                <SearchBar
+                    placeholder="Tìm kiếm..."
+                    lightTheme
+                    round
+                    onChangeText={text => this.searchFilterFunction(text)}
+                    autoCorrect={false}
+                    value={this.state.value}
+                    containerStyle={{
+                        left: WIDTH * 0.1,
+                        height: 45,
+                        width: WIDTH * 0.9,
+                        backgroundColor: 'white',
+                    }}
+                    inputContainerStyle={{
+                        height: 30,
+                    }}
                 />
+                <View style={{
+                    //position: 'absolute',
+                    marginTop: -1,
+                    height: 1,
+                    backgroundColor: 'pink'
+                }} />
+
                 <FlatList
                     data={this.state.data}
                     renderItem={({ item, index }) => {
@@ -191,14 +220,14 @@ export default class HomepageR extends React.Component {
     }
 }
 const styles = StyleSheet.create({
-    img:{
+    img: {
         position: 'absolute',
         marginTop: 7,
         marginLeft: 5,
         width: 25,
         height: 25
     },
-    screenname:{
+    screenname: {
         position: 'absolute',
         marginTop: 10,
         marginLeft: 100,

@@ -1,8 +1,6 @@
 import React from 'react';
 import { StyleSheet, RefreshControl, FlatList, Text, View, Vibration, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { COLOR_PINK, COLOR_PINK_LIGHT, COLOR_PINK_HEAVY } from './myColor'
-
-import AsyncStorage from '@react-native-community/async-storage';
+import { COLOR_CYAN_MEDIUM, COLOR_BLUE_LIGHT, COLOR_PINK, COLOR_PINK_LIGHT, COLOR_PINK_HEAVY } from './myColor'
 
 class FlatListItem extends React.Component {
     render() {
@@ -13,8 +11,9 @@ class FlatListItem extends React.Component {
         const Token = navigation.getParam('Token');
         const NameInfo = navigation.getParam('NameInfo');
         const NameService = navigation.getParam('NameService');
-        const Avatar = navigation.getParam('Avatar');
         const Description = navigation.getParam('Description');
+        const IsRoles = navigation.getParam('IsRoles');
+
         return (
             <View>
                 <TouchableOpacity style={styles.btnSignin}
@@ -26,9 +25,9 @@ class FlatListItem extends React.Component {
                             UserID: UserID,
                             NameService: NameService,
                             NameInfo: NameInfo,
-                            Avatar: Avatar,
                             Description: Description,
                             Role: this.props.item.toString(),
+                            IsRoles: IsRoles,
                         })
                     }>
                     <TextInput
@@ -99,7 +98,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: COLOR_PINK
+        backgroundColor: COLOR_BLUE_LIGHT
     },
     up: {
         flex: 3,
@@ -135,7 +134,7 @@ const styles = StyleSheet.create({
         height: 45,
         borderRadius: 6,
         alignItems: 'center',
-        backgroundColor: COLOR_PINK_HEAVY
+        backgroundColor: COLOR_CYAN_MEDIUM
     },
     signinText: {
         fontSize: 18,

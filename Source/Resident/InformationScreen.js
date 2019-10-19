@@ -1,199 +1,512 @@
 import React from 'react';
-import { FlatList, RefreshControl, StyleSheet, Image, Button, Text, View, Vibration, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
-import { GetInfoResident } from '../../APIs/APIclass'
+import { Alert, ScrollView, Modal, StyleSheet, Image, Button, Text, View, Vibration, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { ChangePassword, GetUserbyUserId, GetSingleResidentbyId } from '../../APIs/APIclass'
+import MenuButton from '../Component/MenuButton'
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-community/async-storage';
 
-export default class CreatPost extends React.Component {
+export default class information extends React.Component {
+  // static navigationOptions = {
+  //   header: null,
+  // }
+
   constructor() {
     super();
     this.state = {
-      filePath: {},
-      Title: '',
-      Description: '',
-      Status: '',
-      Price: ''
+      nameInfo: '',
+      apartmentCode: '',
+      phone: '',
+      email: '',
+      modalVisible: false,
+      activeRowKey: null,
+      pw: '',
+      changepw: '',
+      confirmchangepw: '',
+      avatar: ''
     }
+  }
+  setModalVisible(visible) {
+    this.setState({ modalVisible: visible });
   }
   updateValue(text, field) {
     this.setState({ [field]: text, });
   }
-  chooseFile = () => {
-    var options = {
-      title: 'Select Image',
-      base64: true,
-      quality: 0.5,
-      customButtons: [
-        { name: 'customOptionKey', title: 'Choose Photo from Custom Option' },
-      ],
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-    ImagePicker.showImagePicker(options, response => {
-      console.log('Response = ', response);
- 
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
+  componentDidMount() {
+		const { navigation } = this.props;
+
+		this.focusListener = navigation.addListener('didFocus', () => {
+			this.refreshDataFromServer();
+		  });
+  }
+  refreshDataFromServer = () => {
+    const { navigation } = this.props;
+    const UserID = navigation.getParam('UserID');
+    const Token = navigation.getParam('Token');
+
+    GetUserbyUserId(UserID, Token)
+      .then(response => {
+        if (response.toString() !== "false") {
+          let user = JSON.parse(response);
+          email = new String(user.email);
+          phone = new String(user.phoneNumber);
+          nameInfo = new String(user.nameInfo);
+
+          GetSingleResidentbyId(UserID)
+            .then(res => {
+              if (res.toString() !== "false") {
+                let sp = JSON.parse(res);
+                avatar = new String(sp.image);
+                apartmentCode = new String(sp.apartmentCode);
+
+                this.setState({
+                  nameInfo: nameInfo,
+                  avatar: avatar,
+                  email: email,
+                  phone: phone,
+                  apartmentCode: apartmentCode,
+                });
+              }
+            });
+        }
+      });
+	}
+  changepassword() {
+    const { navigation } = this.props;
+    const Username = navigation.getParam('Username');
+    const Password = navigation.getParam('Password');
+    const Token = navigation.getParam('Token');
+
+    if (Password == this.state.pw) {
+      if (this.state.changepw.trim() !== '' || this.state.confirmchangepw.trim() !== '') {
+        if (this.state.changepw == this.state.confirmchangepw) {
+          Alert.alert(
+            'Đổi mật khẩu',
+            'Bạn có muốn đổi mật khẩu tài khoản?',
+            [
+              { text: 'Hủy', onPress: () => { return null } },
+              {
+                text: 'Xác nhận', onPress: () => {
+                  ChangePassword(Username, Password, this.state.changepw, Token)
+                    .then(response => {
+                      if (response.toString() == "true") {
+                        AsyncStorage.clear();
+
+                        this._storeData(Username, this.state.changepw);
+                        this.setModalVisible(!this.state.modalVisible);
+                      }
+                    });
+                  this.setState({
+                    changepw: '',
+                    confirmchangepw: '',
+                    pw: this.state.changepw,
+                  });
+                }
+              },
+            ],
+            { cancelable: false }
+          )
+        } else {
+          alert("Mật khẩu nhập lại không trùng khớp")
+        }
       } else {
-        let source = response;
-        // You can also display the image using data:
-        // let source = { uri: 'data:image/jpeg;base64,' + response.data };
-        this.setState({
-          filePath: source,
-        });
+        alert("Vui lòng nhập đầy đủ")
       }
-    });
-  };
-
-  submit() {
-    if (this.state.Title.trim() == '' || this.state.Description.trim() == ''|| this.state.filePath == {} || this.state.Price.trim() == '') {
-      alert('Please fill in all');
     } else {
-      const { navigation } = this.props;
-      const UserID = navigation.getParam('UserID');
-      const BuildingID = navigation.getParam('BuildingID');
-      const Token = navigation.getParam('Token');
-
-      alert("Đang gửi bài...");
-      AddProviderPost(this.state.Title, this.state.Description, this.state.filePath.data, 1, UserID, this.state.Price, BuildingID, Token)
-        .then(res => {
-          if (res.toString() !== "false") {
-            this.props.navigation.goBack();
-          }else{
-            alert("Đã xảy ra lỗi xin nhập lại!")
-          }
-        })
-        .catch((error) => {
-          //this.setState({ data: [] });
-          alert("Đã xảy ra lỗi mạng!")
-        });
+      alert("Nhập sai mật khẩu cũ!")
     }
   }
+  _storeData = async (username, password) => {
+    try {
+      await AsyncStorage.setItem('Username', username)
+      await AsyncStorage.setItem('Password', password)
+    } catch (error) {
+      // Error saving data
+    }
+  }
+  nav() {
+    const { navigation } = this.props;
+    const UserID = navigation.getParam('UserID');
+    const Token = navigation.getParam('Token');
 
+    this.props.navigation.navigate('EditInfoScreenResident', {
+      Token: Token,
+      UserID: UserID,
+      NameInfo: this.state.nameInfo,
+      PhoneNumber: this.state.phone,
+      Avatar: this.state.avatar,
+      Email: this.state.email,
+      ApartmentCode: this.state.apartmentCode,
+    })
+  }
+  changeRole() {
+    const { navigation } = this.props;
+    const UserID = navigation.getParam('UserID');
+    const Username = navigation.getParam('Username');
+    const Password = navigation.getParam('Password');
+    const Token = navigation.getParam('Token');
+    const NameInfo = navigation.getParam('NameInfo');
+    const NameService = navigation.getParam('NameService');
+    const Description = navigation.getParam('Description');
+    const IsRoles = navigation.getParam('IsRoles');
+
+    this.props.navigation.navigate('RoleScreen', {
+      Username: Username,
+      Password: Password,
+      Token: Token,
+      UserID: UserID,
+      NameService: NameService,
+      NameInfo: NameInfo,
+      Description: Description,
+      IsRoles: IsRoles,
+    })
+  }
   render() {
-    return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          {/* <Image 
-          source={{ uri: this.state.filePath.path}} 
-          style={{width: 100, height: 100}} />
-          <Image
-            source={{
-              uri: 'data:image/jpeg;base64,' + this.state.filePath.data,
-            }}
-            style={{ width: 100, height: 100 }}
-          /> */}
+    const { navigation } = this.props;
+    const IsRoles = navigation.getParam('IsRoles');
 
-          <Text>
-            Tiêu đề:
-          </Text>
-          <View style={styles.textInputContainer}>
-            <TextInput style={styles.textInput}
-              placeholder="Nhập tên bài đăng..."
-              onChangeText={(text) => this.updateValue(text, 'Title')}>
-            </TextInput>
+    if( IsRoles == 0){
+      return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            <MenuButton navigation={this.props.navigation} />
+            <View style={styles.up}>
+              <Text style={styles.screenname}>Thông tin tài khoản</Text>
+            </View>
+            <View style={{
+              height: 1,
+              backgroundColor: 'pink'
+            }} />
+            <View style={styles.containerimg}>
+              <TouchableOpacity style={styles.btnEdit}
+                onPress={() => this.nav()}>
+                <Text style={{ textAlign: 'center' }}>Chỉnh sửa</Text>
+              </TouchableOpacity>
+              <View style={styles.imgView}>
+                <Image style={styles.img} source={{
+                  uri: 'data:image/jpeg;base64,' + avatar,
+                }} />
+              </View>
+              <View style={styles.profileText}>
+                <Text style={styles.name}>{this.state.nameInfo}</Text>
+              </View>
+            </View>
+  
+            <View style={styles.infoText}>
+              <View style={{ flexDirection: 'row', }}>
+                <Ionicons name="ios-mail" size={38} color="gray" />
+                <Text style={styles.info}>{this.state.email}</Text>
+              </View>
+            </View>
+            <View style={styles.infoText}>
+              <View style={{ flexDirection: 'row', top: 15, left: 3 }}>
+                <Ionicons name="ios-tablet-portrait" size={38} color="gray" />
+                <Text style={styles.infoPhone}>{this.state.phone}</Text>
+              </View>
+            </View>
+  
+            <Modal
+              animationType="slide"
+              transparent={false}
+              visible={this.state.modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!this.state.modalVisible);
+              }}>
+              <View style={{ marginTop: 22 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setModalVisible(!this.state.modalVisible);
+                  }}>
+                  <Text>Quay lại</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{
+                flex: 1,
+                flexDirection: 'row',
+                backgroundColor: 'white',
+                top: 100,
+              }}>
+                <View style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                }}>
+                  <View style={{ flexDirection: 'column' }}>
+                    <Text style={{ top: 11, textAlign: 'right', }}>Nhập mật khẩu mới:</Text>
+                    <Text style={{ top: 28, textAlign: 'right', }}>Nhập lại mật khẩu mới:</Text>
+                    <Text style={{ top: 42, textAlign: 'right', }}>Mật khẩu cũ:</Text>
+                  </View>
+  
+                  <View style={{ flexDirection: 'column' }}>
+                    <TextInput
+                      style={styles.textInputContainer}
+                      //placeholder="Mật khẩu tài khoản..."
+                      onChangeText={(text) => this.updateValue(text, 'changepw')}
+                      secureTextEntry={true}>
+                    </TextInput>
+                    <TextInput
+                      style={styles.textInputContainer}
+                      //placeholder="Mật khẩu tài khoản..."
+                      onChangeText={(text) => this.updateValue(text, 'confirmchangepw')}
+                      secureTextEntry={true}>
+                    </TextInput>
+                    <TextInput
+                      style={styles.textInputContainer}
+                      //placeholder="Mật khẩu tài khoản..."
+                      onChangeText={(text) => this.updateValue(text, 'pw')}
+                      secureTextEntry={true}>
+                    </TextInput>
+                  </View>
+                </View>
+  
+                <TouchableOpacity style={styles.btnChange}
+                  onPress={() => this.changepassword()} >
+                  <TextInput style={{ color: 'white' }} editable={false}>
+                    Xác nhận
+                </TextInput>
+                </TouchableOpacity>
+              </View>
+              <View style={{
+                height: 2,
+                backgroundColor: 'white'
+              }}>
+              </View>
+            </Modal>
+  
+            <TouchableOpacity style={styles.btnPW} onPress={() => {
+              this.setModalVisible(!this.state.modalVisible);
+            }}>
+              <TextInput style={{ color: 'white' }} editable={false}>
+                Đổi mật khẩu
+                </TextInput>
+            </TouchableOpacity>
           </View>
-          <Text>
-            Miêu tả:
-                </Text>
-          <View style={styles.textInputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Nhập nội dung..."
-              onChangeText={(text) => this.updateValue(text, 'Description')}>
-            </TextInput>
+        </TouchableWithoutFeedback>
+      );
+    }else{
+      return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={{ flex: 1 }}>
+            <MenuButton navigation={this.props.navigation} />
+            <View style={styles.up}>
+              <Text style={styles.screenname}>Thông tin tài khoản</Text>
+            </View>
+            <View style={{
+              height: 1,
+              backgroundColor: 'pink'
+            }} />
+            <View style={styles.containerimg}>
+              <TouchableOpacity style={styles.btnEdit}
+                onPress={() => this.nav()}>
+                <Text style={{ textAlign: 'center' }}>Chỉnh sửa</Text>
+              </TouchableOpacity>
+              <View style={styles.imgView}>
+                <Image style={styles.img} source={{
+                  uri: 'data:image/jpeg;base64,' + avatar,
+                }} />
+              </View>
+              <View style={styles.profileText}>
+                <Text style={styles.name}>{this.state.nameInfo}</Text>
+              </View>
+            </View>
+  
+            <View style={styles.infoText}>
+              <View style={{ flexDirection: 'row', }}>
+                <Ionicons name="ios-mail" size={38} color="gray" />
+                <Text style={styles.info}>{this.state.email}</Text>
+              </View>
+            </View>
+            <View style={styles.infoText}>
+              <View style={{ flexDirection: 'row', top: 15, left: 3 }}>
+                <Ionicons name="ios-tablet-portrait" size={38} color="gray" />
+                <Text style={styles.infoPhone}>{this.state.phone}</Text>
+              </View>
+            </View>
+  
+            <Modal
+              animationType="slide"
+              transparent={false}
+              visible={this.state.modalVisible}
+              onRequestClose={() => {
+                this.setModalVisible(!this.state.modalVisible);
+              }}>
+              <View style={{ marginTop: 22 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setModalVisible(!this.state.modalVisible);
+                  }}>
+                  <Text>Quay lại</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{
+                flex: 1,
+                flexDirection: 'row',
+                backgroundColor: 'white',
+                top: 100,
+              }}>
+                <View style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                }}>
+                  <View style={{ flexDirection: 'column' }}>
+                    <Text style={{ top: 11, textAlign: 'right', }}>Nhập mật khẩu mới:</Text>
+                    <Text style={{ top: 28, textAlign: 'right', }}>Nhập lại mật khẩu mới:</Text>
+                    <Text style={{ top: 42, textAlign: 'right', }}>Mật khẩu cũ:</Text>
+                  </View>
+  
+                  <View style={{ flexDirection: 'column' }}>
+                    <TextInput
+                      style={styles.textInputContainer}
+                      //placeholder="Mật khẩu tài khoản..."
+                      onChangeText={(text) => this.updateValue(text, 'changepw')}
+                      secureTextEntry={true}>
+                    </TextInput>
+                    <TextInput
+                      style={styles.textInputContainer}
+                      //placeholder="Mật khẩu tài khoản..."
+                      onChangeText={(text) => this.updateValue(text, 'confirmchangepw')}
+                      secureTextEntry={true}>
+                    </TextInput>
+                    <TextInput
+                      style={styles.textInputContainer}
+                      //placeholder="Mật khẩu tài khoản..."
+                      onChangeText={(text) => this.updateValue(text, 'pw')}
+                      secureTextEntry={true}>
+                    </TextInput>
+                  </View>
+                </View>
+  
+                <TouchableOpacity style={styles.btnChange}
+                  onPress={() => this.changepassword()} >
+                  <TextInput style={{ color: 'white' }} editable={false}>
+                    Xác nhận
+                </TextInput>
+                </TouchableOpacity>
+              </View>
+              <View style={{
+                height: 2,
+                backgroundColor: 'white'
+              }}>
+              </View>
+            </Modal>
+  
+            <TouchableOpacity style={styles.btnRole} onPress={() => this.changeRole()}>
+              <TextInput style={{ color: 'white' }} editable={false}>
+                Đổi vai trò
+                </TextInput>
+            </TouchableOpacity>
+  
+            <TouchableOpacity style={styles.btnPW} onPress={() => {
+              this.setModalVisible(!this.state.modalVisible);
+            }}>
+              <TextInput style={{ color: 'white' }} editable={false}>
+                Đổi mật khẩu
+                </TextInput>
+            </TouchableOpacity>
           </View>
-          <Text>
-            Giá:
-                </Text>
-          <View style={styles.textInputContainer}>
-            <TextInput style={styles.textInput}
-              placeholder="Nhập giá..."
-              onChangeText={(text) => this.updateValue(text, 'Price')}>
-            </TextInput>
-          </View>
-          <Image
-            source={{ uri: this.state.filePath.uri }}
-            style={{ width: 250, height: 250 }}
-          />
-
-          {/* <Text style={{ alignItems: 'center' }}>
-            {this.state.filePath.uri}
-          </Text> */}
-
-          <Button title="Chọn hình" onPress={this.chooseFile.bind(this)} />
-
-          <TouchableOpacity style={styles.btnSignin}
-            onPress={() => this.submit()}>
-            <TextInput
-              style={styles.signinText} editable={false}>
-              Tạo bài đăng
-              </TextInput>
-          </TouchableOpacity>
-
-          <FlatList
-            data={this.state.data}
-            renderItem={({ item, index }) => {
-              return (
-                <FlatListItem item={item} index={index} navigation={this.props.navigation}>
-
-                </FlatListItem>);
-            }}
-            keyExtractor={(item, index) => item.id.toString()}
-            refreshControl={
-              <RefreshControl
-                refreshing={this.state.refreshing}
-                onRefresh={this.onRefresh}
-              />}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-    );
+        </TouchableWithoutFeedback>
+      );
+    }
+    
   }
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    //alignItems: 'stretch',
-    //backgroundColor: COLOR_PINK
+  containerimg: {
+    height: 300,
+    backgroundColor: '#abfbff',
   },
-  title: {
-    color: 'orange',
-    textAlign: 'center',
-    width: 330,
-    fontSize: 23
+  imgView: {
+    top: 20,
+    alignItems: 'center',
+  },
+  profileText: {
+    top: 20,
+    alignItems: 'center',
+  },
+  infoText: {
+    left: 35,
+    top: 30,
+  },
+  info: {
+    top: 6,
+    left: 15,
+    fontSize: 16,
+    color: 'black',
+    textAlign: 'left',
+  },
+  infoPhone: {
+    top: 6,
+    left: 20,
+    fontSize: 16,
+    color: 'black',
+    textAlign: 'left',
+  },
+  name: {
+    fontSize: 38,
+    fontWeight: "900",
+    color: 'black',
+    textAlign: 'left',
+  },
+  img: {
+    height: 220,
+    width: 220,
+    borderRadius: 50,
+  },
+  screenname: {
+    marginTop: 10,
+    fontSize: 20,
+  },
+  up: {
+    alignItems: 'center',
+    height: 50,
+  },
+  down: {
+
+  },
+  btnEdit: {
+    position: 'absolute',
+    width: 100,
+    height: 35,
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'white',
+    borderColor: 'red',
+    borderWidth: 1,
+    borderRadius: 6,
+    right: 2,
+    top: 2,
+  },
+  btnRole: {
+    top: 120,
+    left: 25,
+    width: 100,
+    height: 40,
+    borderRadius: 6,
+    alignItems: 'center',
+    backgroundColor: 'blue'
+  },
+  btnPW: {
+    top: 200,
+    left: 25,
+    width: 100,
+    height: 40,
+    borderRadius: 6,
+    alignItems: 'center',
+    backgroundColor: 'green'
+  },
+  btnChange: {
+    top: 200,
+    left: -50,
+    width: 100,
+    height: 40,
+    borderRadius: 6,
+    alignItems: 'center',
+    backgroundColor: 'green'
   },
   textInputContainer: {
     paddingHorizontal: 10,
     borderRadius: 6,
-    marginTop: 20,
     borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 6
-    //backgroundColor: COLOR_PINK_LIGHT
+    height: 35,
+    width: 200,
+    backgroundColor: 'white'
   },
-  textInput: {
-    width: 400,
-    height: 45
-  },
-  btnSignin: {
-    marginTop: 25,
-    width: 260,
-    height: 45,
-    borderRadius: 6,
-    alignItems: 'center',
-    backgroundColor: 'black'
-  },
-  signinText: {
-    fontSize: 18,
-    color: 'white'
-  }
 });

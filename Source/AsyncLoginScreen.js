@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View, Vibration, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
-import { COLOR_PINK, COLOR_PINK_LIGHT, COLOR_PINK_HEAVY } from './myColor'
-import { RegisterToken, GetUsersByUserName, GetSingleProviderService } from '../APIs/APIclass'
+import { COLOR_BLUE_LIGHT, COLOR_PINK, COLOR_PINK_LIGHT, COLOR_PINK_HEAVY } from './myColor'
+import { LoginTokenGetInfo, RegisterToken, GetSingleResidentbyId, GetSingleProviderService } from '../APIs/APIclass'
 
 export default class SignIn extends React.Component {
   static navigationOptions = {
@@ -17,9 +17,6 @@ export default class SignIn extends React.Component {
       role: []
     }
   }
-  updateValue(text, field) {
-    this.setState({ [field]: text, });
-  }
   componentDidMount = async () => {
     try {
       const username = await AsyncStorage.getItem('Username');
@@ -31,14 +28,15 @@ export default class SignIn extends React.Component {
       // error reading value
     }
   }
-
   SignIn(username, password) {
-    RegisterToken(username, password)
+    LoginTokenGetInfo(username, password)
       .then(res => {
         if (res.toString() !== "false") {
           let obj = JSON.parse(res);
           let rol = new String(obj.role);
-          let token = new String(obj.token)
+          let token = new String(obj.token);
+          let userid = new String(obj.info.id);
+          let usernameInfo= new String(obj.info.nameInfo);
 
           let count = 0;
           let Role = rol.split(",");
@@ -57,10 +55,10 @@ export default class SignIn extends React.Component {
           if (Role.length == 1) {
             let sRole = new String(Role);
             if (sRole == "Resident") {
-              this.Navigate(username, password, token, sRole, sRole + 'Building', rol);
+              this.NavigateResident(username, password, userid, usernameInfo, token, sRole, sRole + 'Building', 0);
             }
             if (sRole == "ServiceProvider") {
-              this.Navigate(username, password, token, sRole, sRole + 'Building', rol);
+              this.NavigateSP(username, password, userid, usernameInfo, token, sRole, sRole + 'Building', 0);
             }
           }
 
@@ -68,61 +66,63 @@ export default class SignIn extends React.Component {
             alert('Bạn không có quyền đăng nhập!');
           }
           else {
-            this.Navigate(username, password, token, this.state.role, 'RoleScreen', rol);
+            this.NavigateSP(username, password, userid, usernameInfo, token, this.state.role, 'RoleScreen', 1);
           }
         } else {
-          //alert('Đăng nhập thất bại :(. Xin vui lòng thử lại!');
+          AsyncStorage.clear();
+          alert('Đăng nhập thất bại :(. Xin vui lòng thử lại!');
         }
       });
   }
-
-  Navigate(username, password, token, role, screen, rol) {
-    GetUsersByUserName(username, token)
+  NavigateResident(username, password, userID, usernameInfo, token, role, screen, IsRoles) {
+    GetSingleResidentbyId(userID)
       .then(response => {
         if (response.toString() !== "false") {
-          let user = JSON.parse(response);
-          userID = new String(user.id);
-          nameInfo = new String(user.nameInfo);
+          //let re = JSON.parse(response);
+          //reImage = new String(re.image);
 
-          // GetSingleProviderService(userID)
-          //   .then(res => {
-          //     if (res.toString() !== "false") {
-          //       let sp = JSON.parse(res);
-          //       spName = new String(sp.serviceName);
-          //       spDescription = new String(sp.description);
-          //       spImage = new String(sp.image);
+          this._storeData(username, password);
 
-          //       this._storeData(username, password, token, rol, spName, spDescription, spImage);
-
-          //       this.props.navigation.navigate(screen, {
-          //         Username: username,
-          //         Password: password,
-          //         Token: token,
-          //         UserID: userID,
-          //         NameInfo: nameInfo,
-          //         Role: role,
-          //         NameService: spName,
-          //         Description: spDescription,
-          //         Avatar: spImage,
-          //       });
-          //     }
-          //   });
-          //this._storeData(username, password, token, rol, spName, spDescription, spImage);
-          this._storeData(username, password, token, rol);
-                this.props.navigation.navigate(screen, {
-                  Username: username,
-                  Password: password,
-                  Token: token,
-                  UserID: userID,
-                  NameInfo: nameInfo,
-                  Role: role,
-                });
+          this.props.navigation.navigate(screen, {
+            Username: username,
+            Password: password,
+            Token: token,
+            UserID: userID,
+            NameInfo: usernameInfo,
+            Role: role,
+            IsRoles: IsRoles,
+          });
         }
-        this.setState({ role: [] });
       });
+    this.setState({ role: [] });
+  }
+  NavigateSP(username, password, userID, usernameInfo, token, role, screen, IsRoles) {
+    GetSingleProviderService(userID)
+      .then(res => {
+        if (res.toString() !== "false") {
+          let sp = JSON.parse(res);
+          spName = new String(sp.serviceName);
+          spDescription = new String(sp.description);
+
+          this._storeData(username, password);
+
+          this.props.navigation.navigate(screen, {
+            Username: username,
+            Password: password,
+            Token: token,
+            UserID: userID,
+            NameInfo: usernameInfo,
+            Role: role,
+            NameService: spName,
+            Description: spDescription,
+            IsRoles: IsRoles,
+          });
+        }
+      });
+    this.setState({ role: [] });
   }
 
-  _storeData = async (username, password, token, role, nameservice, description, avatar) => {
+  _storeData = async (username, password) => {
 
     try {
       await AsyncStorage.setItem('Username', username)
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'stretch',
-    backgroundColor: COLOR_PINK
+    backgroundColor: COLOR_BLUE_LIGHT
   },
   up: {
     flex: 3,

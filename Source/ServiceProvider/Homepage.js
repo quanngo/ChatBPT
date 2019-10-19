@@ -268,11 +268,15 @@ export default class HomepageSP extends React.Component {
         const BuildingID = navigation.getParam('BuildingID');
 
         this.setState({ refreshing: true });
-        ListAllProviderPostbyProviderIdInBuilding(UserID, BuildingID).then(res => {
-            let services = JSON.parse(res);
-            this.setState({ data: services });
-            this.setState({ refreshing: false });
-        })
+        ListAllProviderPostbyProviderIdInBuilding(UserID, BuildingID)
+            .then(res => {
+                if (res.toString() !== "false") {
+                    let services = JSON.parse(res);
+
+                    this.setState({ data: services });
+                    this.setState({ refreshing: false });
+                }
+            })
             .catch((error) => {
                 //this.setState({ data: [] });
                 this.setState({ refreshing: false });
@@ -341,7 +345,7 @@ const styles = StyleSheet.create({
     screenname: {
         position: 'absolute',
         marginTop: 10,
-        marginLeft: 100,
+        marginLeft: 70,
         fontSize: 20,
     },
     title: {
@@ -364,6 +368,13 @@ const styles = StyleSheet.create({
         padding: 2,
         fontSize: 12,
         textAlign: 'right',
+    },
+    flatListItem: {
+        color: 'black',
+        marginTop: 20,
+        padding: 2,
+        fontSize: 16,
+        textAlign: 'center',
     },
     textInputContainer: {
         paddingHorizontal: 10,

@@ -33,14 +33,14 @@ class FlatListItem extends React.Component {
                                 onPress={() => {
                                     this.setModalVisible(!this.state.modalVisible);
                                 }}>
-                                <Text>Go back</Text>
+                                <Text>Quay lại</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={{
                             flex: 1,
                             flexDirection: 'row',
                             // backgroundColor: this.props.index % 2 == 0 ? 'mediumseagreen': 'tomato'                
-                            backgroundColor: 'mediumseagreen'
+                            backgroundColor: '#e3e3e3'
                         }}>
                             <Image
                                 source={{ uri: "data:image/png;base64, " + this.props.item.image }}
@@ -80,7 +80,7 @@ class FlatListItem extends React.Component {
                             flex: 1,
                             flexDirection: 'row',
                             // backgroundColor: this.props.index % 2 == 0 ? 'mediumseagreen': 'tomato'                
-                            backgroundColor: 'mediumseagreen'
+                            backgroundColor: '#e3e3e3'
                         }}>
                             <Image
                                 source={{ uri: "data:image/png;base64, " + this.props.item.image }}
@@ -221,7 +221,8 @@ export default class DetailService extends React.Component {
                 })
             } else {
                 let name = ServiceName + ' ' + BuildingName;
-                AddPrivateChatGroupSPtoResident(name, 2, ProviderID, ServiceImage, 1, BuildingID, UserID, 1).then(response => {
+                //AddPrivateChatGroupSPtoResident(name, 2, ProviderID, ServiceImage, 1, BuildingID, UserID, 1).then(response => {
+                AddPrivateChatGroupSPtoResident(name, 2, ProviderID, "", 1, BuildingID, UserID, 1).then(response => {
                     alert("Đang tạo phòng chat");
                     if (response.toString() !== 'false') {
                         let gr = JSON.parse(response);

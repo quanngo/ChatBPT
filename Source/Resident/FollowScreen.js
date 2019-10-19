@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshControl, Button, StyleSheet, FlatList, Text, View, Vibration, TextInput, TouchableOpacity, Image } from 'react-native';
+import { Dimensions, RefreshControl, Button, StyleSheet, FlatList, Text, View, Vibration, TextInput, TouchableOpacity, Image } from 'react-native';
 import { ListAllResidentFollowByResidentID } from '../../APIs/APIclass';
 import { SearchBar } from 'react-native-elements';
 
@@ -37,7 +37,7 @@ class FlatListItem extends React.Component {
                             flex: 1,
                             flexDirection: 'row',
                             // backgroundColor: this.props.index % 2 == 0 ? 'mediumseagreen': 'tomato'                
-                            backgroundColor: 'mediumseagreen'
+                            backgroundColor: '#edffed'
                         }}>
                             <Image
                                 source={{ uri: "data:image/png;base64, " + this.props.item.image }}
@@ -132,12 +132,15 @@ export default class Following extends React.Component {
         });
     }
     render() {
+
+        const WIDTH = Dimensions.get('window').width;
+
         return (
             <View style={{ flex: 1 }}>
                 <MenuButton navigation={this.props.navigation} />
-                <View style={styles.up}>
-                    {/* <Image style={styles.img}
-                        source={{ uri: "data:image/png;base64, " + Image }} /> */}
+                {/* <View style={styles.up}>
+                    <Image style={styles.img}
+                        source={{ uri: "data:image/png;base64, " + Image }} />
 
                     <Text style={styles.screenname}>Dịch vụ yêu thích</Text>
 
@@ -154,7 +157,31 @@ export default class Following extends React.Component {
                     onChangeText={text => this.searchFilterFunction(text)}
                     autoCorrect={false}
                     value={this.state.value}
+                /> */}
+                <SearchBar
+                    placeholder="Tìm kiếm..."
+                    lightTheme
+                    round
+                    onChangeText={text => this.searchFilterFunction(text)}
+                    autoCorrect={false}
+                    value={this.state.value}
+                    containerStyle={{
+                        left: WIDTH * 0.1,
+                        height: 45,
+                        width: WIDTH * 0.9,
+                        backgroundColor: 'white',
+                    }}
+                    inputContainerStyle={{
+                        height: 30,
+                    }}
                 />
+                <View style={{
+                    //position: 'absolute',
+                    marginTop: -1,
+                    height: 1,
+                    backgroundColor: 'pink'
+                }} />
+
                 <FlatList
                     data={this.state.data}
                     renderItem={({ item, index }) => {

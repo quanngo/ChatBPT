@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, TouchableWithoutFeedback, Keyboard, Text, View, TouchableOpacity, Image, Alert, TextInput, FlatList, Button, RefreshControl } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import * as signalR from '@aspnet/signalr';
 
@@ -63,7 +64,7 @@ export default class ChatScreen extends Component {
     updateValue(text, field) {
         this.setState({ [field]: text, });
     }
-    
+
     componentDidMount() {
         this._isMounted = true;
 
@@ -71,7 +72,9 @@ export default class ChatScreen extends Component {
         const GroupChatID = navigation.getParam('GroupChatID');
 
         if (hub.connectionState == 1) {
-            hub.invoke("JoinRoom", GroupChatID);
+            hub.invoke("JoinRoom", GroupChatID)
+            .catch((error) => { alert(error) });
+            
             this.refreshDataFromServer();
         } else if (hub.connectionState == 0) {
             hub.start()
@@ -83,18 +86,16 @@ export default class ChatScreen extends Component {
 
         hub.on("message", (id, name, msg, img, uId) => {
             if (this._isMounted) {
-                if (id !== null) {
-                    //let mess = '{"Name":"' + name + '","Message":"' + msg + '","Image":"' + img + '"}';
-                    let mess = '{"Id":"' + id + '","Name":"' + name + '","Message":"' + msg + '"}';
+                //let mess = '{"Name":"' + name + '","Message":"' + msg + '","Image":"' + img + '"}';
+                let mess = '{"Id":"' + id + '","Name":"' + name + '","Message":"' + msg + '"}';
 
-                    var obj = JSON.parse(mess.toString());
+                var obj = JSON.parse(mess.toString());
 
-                    this.setState({
-                        data: this.state.data.concat(obj)
-                    })
-                    // this.setState({ scrollmesss: this.state.count + 0.1 });
-                    // this.flatListRef.scrollToOffset({ offset: this.state.scrollmesss, animated: true });
-                }
+                this.setState({
+                    data: this.state.data.concat(obj)
+                })
+                // this.setState({ scrollmesss: this.state.count + 0.1 });
+                // this.flatListRef.scrollToOffset({ offset: this.state.scrollmesss, animated: true });
             }
         });
     }
@@ -124,11 +125,13 @@ export default class ChatScreen extends Component {
                 }
             }
         });
-        hub.invoke("GetHistoryMobi", GroupChatID, UserID, Token, this.state.count);
+        hub.invoke("GetHistoryMobi", GroupChatID, UserID, Token, this.state.count)
+        .catch((error) => { alert(error) });
+        
 
         hub.on("Loading", () => { });
         hub.on("doneLoad", () => { });
-        
+
         this.setState({ count: this.state.count + 1 });
     }
     componentWillUnmount() {
@@ -167,6 +170,11 @@ export default class ChatScreen extends Component {
                 <View style={styles.up}>
                     {/* <Image style={styles.img}
                         source={{ uri: "data:image/png;base64, " + Image }} /> */}
+
+                    <Ionicons name={"ios-arrow-round-back"}
+                        size={50}
+                        style={{ position: 'absolute', left: 10}} 
+                        onPress={() => this.props.navigation.goBack()}/>
 
                     <Text style={styles.screenname}>{GroupChatName}</Text>
                     <View style={{

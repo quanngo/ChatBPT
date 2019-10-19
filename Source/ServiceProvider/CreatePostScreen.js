@@ -1,12 +1,14 @@
 import React from 'react';
-import { StyleSheet, Image, Button, Text, View, Vibration, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { ScrollView, Dimensions, StyleSheet, Image, Button, Text, View, Vibration, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import { AddProviderPost } from '../../APIs/APIclass'
 
+const WIDTH = Dimensions.get('window').width;
+
 export default class CreatPost extends React.Component {
-  // static navigationOptions = {
-  //   header: null,
-  // }
+  static navigationOptions = {
+    title: 'Tạo bài đăng',
+  }
 
   constructor() {
     super();
@@ -36,7 +38,7 @@ export default class CreatPost extends React.Component {
     };
     ImagePicker.showImagePicker(options, response => {
       console.log('Response = ', response);
- 
+
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -70,7 +72,7 @@ export default class CreatPost extends React.Component {
           if (res.toString() !== "false") {
             alert("Tạo thành công :)");
             this.props.navigation.goBack();
-          }else{
+          } else {
             alert("Đã xảy ra lỗi xin nhập lại :(")
           }
         })
@@ -84,8 +86,9 @@ export default class CreatPost extends React.Component {
   render() {
     return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1, position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
-          {/* <Image 
+          {/* <ScrollView style={{ flex: 1, position: 'absolute', alignItems: 'center', justifyContent: 'center' }}> */}
+          <ScrollView>
+            {/* <Image 
           source={{ uri: this.state.filePath.path}} 
           style={{width: 100, height: 100}} />
           <Image
@@ -95,50 +98,50 @@ export default class CreatPost extends React.Component {
             style={{ width: 100, height: 100 }}
           /> */}
 
-          <Text>
-            Tiêu đề:
+            <Text>
+              Tiêu đề:
           </Text>
-          <View style={styles.textInputContainer}>
-            <TextInput style={styles.textInput}
-              placeholder="Nhập tên bài đăng..."
-              onChangeText={(text) => this.updateValue(text, 'Title')}>
-            </TextInput>
-          </View>
-          <Text>
-            Miêu tả:
-                </Text>
-          <View style={styles.textInputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Nhập nội dung..."
-              onChangeText={(text) => this.updateValue(text, 'Description')}>
-            </TextInput>
-          </View>
-          <Text>
-            Giá:
-                </Text>
-          <View style={styles.textInputContainer}>
-            <TextInput style={styles.textInput}
-              placeholder="Nhập giá..."
-              onChangeText={(text) => this.updateValue(text, 'Price')}>
-            </TextInput>
-          </View>
-          <Image
-            source={{ uri: this.state.filePath.uri }}
-            style={{ width: 250, height: 250 }}
-          />
-
-          <Button title="Chọn hình" onPress={this.chooseFile.bind(this)} />
-
-          <TouchableOpacity style={styles.btnSignin}
-            onPress={() => this.submit()}>
-            <TextInput
-              style={styles.signinText} editable={false}>
-              Tạo bài đăng
+            <View style={styles.textInputContainer}>
+              <TextInput style={styles.textInput}
+                placeholder="Nhập tên bài đăng..."
+                onChangeText={(text) => this.updateValue(text, 'Title')}>
               </TextInput>
-          </TouchableOpacity>
+            </View>
+            <Text>
+              Miêu tả:
+                </Text>
+            <View style={styles.textInputContainer}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập nội dung..."
+                onChangeText={(text) => this.updateValue(text, 'Description')}>
+              </TextInput>
+            </View>
+            <Text>
+              Giá:
+                </Text>
+            <View style={styles.textInputContainer}>
+              <TextInput style={styles.textInput}
+                placeholder="Nhập giá..."
+                onChangeText={(text) => this.updateValue(text, 'Price')}>
+              </TextInput>
+            </View>
+            <Image
+              source={{ uri: this.state.filePath.uri }}
+              style={{ width: 250, height: 250 }}
+            />
 
-        </View>
+            <Button title="Chọn hình" onPress={this.chooseFile.bind(this)} />
+
+            <TouchableOpacity style={styles.btnSubmit}
+              onPress={() => this.submit()}>
+              <TextInput
+                style={styles.submitText} editable={false}>
+                Tạo bài đăng
+              </TextInput>
+            </TouchableOpacity>
+
+        </ScrollView>
       </TouchableWithoutFeedback>
     );
   }
@@ -167,10 +170,10 @@ const styles = StyleSheet.create({
     //backgroundColor: COLOR_PINK_LIGHT
   },
   textInput: {
-    width: 400,
+    width: WIDTH,
     height: 45
   },
-  btnSignin: {
+  btnSubmit: {
     marginTop: 25,
     width: 260,
     height: 45,
@@ -178,7 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'black'
   },
-  signinText: {
+  submitText: {
     fontSize: 18,
     color: 'white'
   }

@@ -9,6 +9,7 @@ import {
 	StyleSheet,
 	TouchableOpacity,
 } from 'react-native';
+import { GetSingleResidentbyId, GetSingleProviderService } from '../../APIs/APIclass'
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -16,6 +17,37 @@ const HEIGHT = Dimensions.get('window').height
 export default class MenuDrawer extends React.Component {
 	static navigationOptions = {
 		activeTintColor: 'red',
+	}
+	constructor(props) {
+        super(props);
+        this.state = ({
+            avatar: '',
+            name: ''
+        });
+    }
+	componentDidMount() {
+		const { navigation } = this.props;
+
+		this.focusListener = navigation.addListener('didFocus', () => {
+			this.refreshDataFromServer();
+		  });
+	}
+	refreshDataFromServer = () => {
+		const { navigation } = this.props;
+		const UserID = navigation.getParam('UserID');
+		const NameInfo = navigation.getParam('NameInfo');
+		GetSingleResidentbyId(UserID)
+			.then(res => {
+				if (res.toString() !== "false") {
+					let sp = JSON.parse(res);
+					avatar = new String(sp.image);
+
+					this.setState({
+						name: NameInfo,
+						avatar: avatar,
+					});
+				}
+			});
 	}
 	navLink(nav, text) {
 		return (
@@ -26,20 +58,18 @@ export default class MenuDrawer extends React.Component {
 	}
 
 	render() {
-		const { navigation } = this.props;
-		const NameInfo = navigation.getParam('NameInfo');
-		const Avatar = navigation.getParam('Avatar');
+		const avatar = this.state.avatar
 		return (
 			<View style={styles.container}>
 				<View style={styles.topLinks}>
 					<View style={styles.profile}>
 						<View style={styles.imgView}>
 							<Image style={styles.img} source={{
-								uri: 'data:image/jpeg;base64,' + Avatar,
+								uri: 'data:image/jpeg;base64,' + avatar,
 							}} />
 						</View>
 						<View style={styles.profileText}>
-							<Text style={styles.name}>{NameInfo}</Text>
+							<Text style={styles.name}>{this.state.name}</Text>
 						</View>
 					</View>
 				</View>

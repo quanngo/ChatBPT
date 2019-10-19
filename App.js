@@ -7,25 +7,29 @@ import AsyncStorage from '@react-native-community/async-storage';
 import SignInScreen from './Source/SignInScreen'
 import AsyncLoginScreen from './Source/AsyncLoginScreen'
 import AuthLoadingScreen from './Source/AuthLoadingScreen'
+import RoleAuthScreen from './Source/RoleAuthScreen'
 import RoleScreen from './Source/RoleScreen'
 import AppHomepageScreen from './AppHomepageScreen'
 import MenuDrawerScreenSP from './Source/Component/MenuDrawerScreenSP'
+import MenuDrawerScreenResident from './Source/Component/MenuDrawerScreenResident'
 
 import SignInResident from './Source/Resident/SignIn'
 import DetailsScreen from './Source/Resident/DetailScreen'
-import ResidentBuildingScreen from './Source/Resident/ResidentBuildingScreen'
+import ResidentBuildingScreen from './Source/Resident/BuildingScreen'
 import HomepageResident from './Source/Resident/Homepage'
 import FollowScreen from './Source/Resident/FollowScreen'
-import Feedback from './Source/Resident/Feedback'
-import FeedbackReply from './Source/Resident/Feedback-Reply'
+import FeedbackScreen from './Source/Resident/FeedbackScreen'
+import FeedbackReplyScreen from './Source/Resident/FeedbackReplyScreen'
 import DetailServiceScreen from './Source/Resident/DetailServiceScreen'
 import ListChatScreenResident from './Source/Resident/ListChatScreen'
 import ChatScreenResident from './Source/Resident/ChatScreen'
 import ListChatPublicGroupScreenResident from './Source/Resident/ListChatPublicGroupScreen'
 import InformationScreenResident from './Source/Resident/InformationScreen'
+import EditInfoScreenResident from './Source/Resident/EditInfoScreen'
+import ListResidentScreen from './Source/Resident/ListResidentScreen'
 
 import SignInProvider from './Source/ServiceProvider/SignIn'
-import ServiceProviderBuildingScreen from './Source/ServiceProvider/ServiceProviderBuildingScreen'
+import ServiceProviderBuildingScreen from './Source/ServiceProvider/BuildingScreen'
 import HomepageServiceProvider from './Source/ServiceProvider/Homepage'
 import CreatePostScreen from './Source/ServiceProvider/CreatePostScreen'
 import ListChatScreenSP from './Source/ServiceProvider/ListChatScreen'
@@ -34,6 +38,7 @@ import DetailPostScreen from './Source/ServiceProvider/DetailPostScreen'
 import CreateGroupChatScreen from './Source/ServiceProvider/CreateGroupChatScreen'
 import EditPostScreen from './Source/ServiceProvider/EditPostScreen'
 import InformationScreenSP from './Source/ServiceProvider/InformationScreen'
+import EditInfoScreenSP from './Source/ServiceProvider/EditInfoScreen'
 
 const ResidentChatStack = createMaterialTopTabNavigator(
   {
@@ -75,7 +80,46 @@ const ResidentChatStack = createMaterialTopTabNavigator(
     },
   }
 );
-
+const ResidentServiceStack = createMaterialTopTabNavigator(
+  {
+    Services: {
+      screen: HomepageResident,
+      navigationOptions: {
+        title: 'Tòa nhà'
+      },
+    },
+    FollowScreen: {
+      screen: FollowScreen,
+      navigationOptions: {
+        title: 'Yêu thích'
+      },
+    },
+  },
+  {
+    defaultNavigationOptions: ({ navigation }) => ({
+      showIcon: true,
+      swipeEnabled: true,
+      tabBarPosition: 'top',
+    }),
+    tabBarOptions: {
+      showIcon: false,
+      labelStyle: {
+        fontSize: 18,
+        top: -10,
+        fontWeight: '900',
+      },
+      activeTintColor: 'black',
+      inactiveTintColor: 'white',
+      style: {
+        height: 40,
+        backgroundColor: '#ffd36e',
+      },
+    },
+    navigationOptions: {
+      header: null
+    },
+  }
+);
 
 const ResidentStack = createMaterialTopTabNavigator(
   {
@@ -85,20 +129,20 @@ const ResidentStack = createMaterialTopTabNavigator(
         title: 'Chat'
       },
     },
+    ListResident: {
+      screen: ListResidentScreen,
+      navigationOptions: {
+        title: 'Cư dân'
+      },
+    },
     Services: {
-      screen: HomepageResident,
+      screen: ResidentServiceStack,
       navigationOptions: {
         title: 'Dịch vụ'
       },
     },
-    FollowScreen: {
-      screen: FollowScreen,
-      navigationOptions: {
-        title: 'Theo dõi'
-      },
-    },
     Feedback: {
-      screen: Feedback,
+      screen: FeedbackScreen,
       navigationOptions: {
         title: 'Phản hồi'
       },
@@ -114,8 +158,8 @@ const ResidentStack = createMaterialTopTabNavigator(
         let iconName;
         if (routeName === 'Services') {
           iconName = "ios-bookmarks";
-        } else if (routeName === 'FollowScreen') {
-          iconName = "ios-heart";
+        } else if (routeName === 'ListResident') {
+          iconName = "ios-people";
         } else if (routeName === 'Feedback') {
           iconName = "ios-water";
         } else if (routeName === 'ChatResident') {
@@ -210,7 +254,7 @@ const ResidentDrawer = createDrawerNavigator(
         drawerIcon: ({ tintColor }) => (
           <Image
             source={require('./Source/Images/Menu-Icons/InformationScreen.png')}
-            style={[style = { height: 40, width: 40, }]}
+            style={[style = { height: 30, width: 30, }]}
           />
         ),
       }
@@ -221,7 +265,7 @@ const ResidentDrawer = createDrawerNavigator(
       <View style={{ flex: 1 }}>
         <SafeAreaView forceInset={{ top: 'always', horizontal: 'never' }}>
           <ScrollView>
-            <MenuDrawerScreenSP {...props} />
+            <MenuDrawerScreenResident {...props} />
 
             <DrawerItems {...props} />
            
@@ -233,8 +277,8 @@ const ResidentDrawer = createDrawerNavigator(
                 flexDirection: 'row',
                 height: 100
               }}>
-                <Image style={{ marginLeft: 14, height: 32, width: 32, }} source={require('./Source/Images/Menu-Icons/building.png')} />
-                <Text style={{ marginLeft: 26, marginTop: 10, fontWeight: 'bold', }}>Tòa nhà</Text>
+                <Image style={{ marginLeft: 14, height: 30, width: 30, }} source={require('./Source/Images/Menu-Icons/building.png')} />
+                <Text style={{ marginLeft: 29, marginTop: 10, fontWeight: 'bold', }}>Tòa nhà</Text>
               </View>
 
             </TouchableOpacity>
@@ -291,7 +335,7 @@ const ServiceProviderDrawer = createDrawerNavigator(
         drawerIcon: ({ tintColor }) => (
           <Image
             source={require('./Source/Images/Menu-Icons/InformationScreen.png')}
-            style={[style = { height: 40, width: 40, }]}
+            style={[style = { height: 30, width: 30, }]}
           />
         ),
       }
@@ -314,8 +358,8 @@ const ServiceProviderDrawer = createDrawerNavigator(
                 flexDirection: 'row',
                 height: 100
               }}>
-                <Image style={{ marginLeft: 14, height: 32, width: 32, }} source={require('./Source/Images/Menu-Icons/building.png')} />
-                <Text style={{ marginLeft: 26, marginTop: 10, fontWeight: 'bold', }}>Tòa nhà</Text>
+                <Image style={{ marginLeft: 14, height: 30, width: 30, }} source={require('./Source/Images/Menu-Icons/building.png')} />
+                <Text style={{ marginLeft: 29, marginTop: 10, fontWeight: 'bold', }}>Tòa nhà</Text>
               </View>
 
             </TouchableOpacity>
@@ -354,11 +398,14 @@ const ServiceProviderDrawer = createDrawerNavigator(
 
 const AppStack = createStackNavigator(
   {
-    // SignInScreen: {
-    //   screen: SignInScreen,
-    // },
+    SignInScreen: {
+      screen: SignInScreen,
+    },
     AsyncLoginScreen:{
       screen: AsyncLoginScreen,
+    },
+    RoleAuthScreen:{
+      screen: RoleAuthScreen,
     },
     RoleScreen: {
       screen: RoleScreen,
@@ -386,14 +433,17 @@ const AppStack = createStackNavigator(
     ResidentBuilding: {
       screen: ResidentBuildingScreen,
     },
-    FeedbackReply: {
-      screen: FeedbackReply,
+    FeedbackReplyScreen: {
+      screen: FeedbackReplyScreen,
     },
     DetailServiceScreen: {
       screen: DetailServiceScreen,
     },
     ChatScreenResident: {
       screen: ChatScreenResident,
+    },
+    EditInfoScreenResident: {
+      screen: EditInfoScreenResident,
     },
 
     //Service Provider
@@ -427,9 +477,13 @@ const AppStack = createStackNavigator(
     EditPostScreen: {
       screen: EditPostScreen,
     },
+    EditInfoScreenSP: {
+      screen: EditInfoScreenSP,
+    },
   },
   {
     initialRouteName: 'AsyncLoginScreen',
+    //initialRouteName: 'RoleAuthScreen',
   }
 );
 

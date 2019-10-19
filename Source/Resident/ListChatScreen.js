@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dimensions, Modal, RefreshControl, Button, StyleSheet, FlatList, Text, View, Vibration, TextInput, TouchableOpacity, Image } from 'react-native';
-import { GetAllGroupResidentByUserID, GetNewestMessageByGroupID } from '../../APIs/APIclass';
+import { GetImageResidentbyUserID, GetInfoUserbyUserId, GetAllGroupResidentByUserID, GetNewestMessageByGroupID } from '../../APIs/APIclass';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SearchBar } from 'react-native-elements';
 import Swipeout from 'react-native-swipeout'
@@ -14,41 +14,105 @@ class FlatListItem extends React.Component {
             modalVisible: false,
             activeRowKey: null,
             mess: "",
-            datetime: ""
+            datetime: "",
+            nameinfo: '',
+            avatar: '',
         });
-    }
-    setModalVisible(visible) {
-        this.setState({ modalVisible: visible });
     }
     componentDidMount() {
         this._isMounted = true;
 
-        let id = new String(this.props.item.id);
+        const { navigation } = this.props;
+        const UserID = navigation.getParam('UserID');
+        const Token = navigation.getParam('Token');
 
-        GetNewestMessageByGroupID(id).then(res => {
-            if (res.toString() !== "false") {
-                let obj = JSON.parse(res);
-                let message = new String(obj.content);
+        // GetNewestMessageByGroupID(id).then(res => {
+        //     if (res.toString() !== "false") {
+        //         let obj = JSON.parse(res);
+        //         let message = new String(obj.content);
 
-                let mess;
-                if (message.length > 23) {
-                    mess = message.substring(0, 22) + "...";
-                } else {
-                    mess = message;
-                }
-                let dt = new Date(obj.datetime);
-                let datetime = dt.getHours() + ':' + dt.getMinutes() + "  " + dt.getDate() + "-" + dt.getMonth() + "-" + dt.getFullYear();
-                this.setState({
-                    mess: mess,
-                    datetime: datetime
-                });
+        //         let mess;
+        //         if (message.length > 23) {
+        //             mess = message.substring(0, 22) + "...";
+        //         } else {
+        //             mess = message;
+        //         }
+        //         let dt = new Date(obj.datetime);
+        //         let datetime = dt.getHours() + ':' + dt.getMinutes() + "  " + dt.getDate() + "-" + dt.getMonth() + "-" + dt.getFullYear();
+        //         this.setState({
+        //             mess: mess,
+        //             datetime: datetime
+        //         });
+        //     } else {
+        //         //this.setState({ mess: "" });
+        //     }
+        // })
+        //     .catch((error) => {
+        //         //this.setState({ mess: "" });
+        //     });
+
+        if (this.props.item.buildingID == 0) {
+            if (this.props.item.adminGrId == UserID) {
+                GetInfoUserbyUserId(this.props.item.guestID, Token)
+                    .then(response => {
+                        if (response.toString() !== "false") {
+                            let user = JSON.parse(response);
+                            let guestName = new String(user.nameInfo);
+                            let userid = new String(user.id);
+
+                            GetImageResidentbyUserID(userid).then(response => {
+                                if (response.toString() !== "false") {
+                                    let avatar = new String(response);
+
+                                    this.setState({
+                                        nameinfo: guestName,
+                                        avatar: avatar,
+                                    });
+                                }
+                            });
+                        }
+                    });
             } else {
-                //this.setState({ mess: "" });
+                GetInfoUserbyUserId(this.props.item.adminGrId, Token)
+                    .then(response => {
+                        if (response.toString() !== "false") {
+                            let user = JSON.parse(response);
+                            let guestName = new String(user.nameInfo);
+                            let userid = new String(user.id);
+
+                            GetImageResidentbyUserID(userid).then(response => {
+                                if (response.toString() !== "false") {
+                                    let avatar = new String(response);
+
+                                    this.setState({
+                                        nameinfo: guestName,
+                                        avatar: avatar,
+                                    });
+                                }
+                            });
+                        }
+                    });
             }
-        })
-            .catch((error) => {
-                //this.setState({ mess: "" });
-            });
+        } else {
+            GetInfoUserbyUserId(this.props.item.adminGrId, Token)
+                .then(response => {
+                    if (response.toString() !== "false") {
+                        let user = JSON.parse(response);
+                        let userid = new String(user.id);
+
+                        GetImageResidentbyUserID(userid).then(response => {
+                            if (response.toString() !== "false") {
+                                let avatar = new String(response);
+
+                                this.setState({
+                                    nameinfo: this.props.item.chatGrName,
+                                    avatar: avatar,
+                                });
+                            }
+                        });
+                    }
+                });
+        }
     }
 
     render() {
@@ -69,7 +133,7 @@ class FlatListItem extends React.Component {
                             UserID: UserID,
                             NameInfo: NameInfo,
                             GroupChatID: this.props.item.id,
-                            GroupChatName: this.props.item.chatGrName
+                            GroupChatName: this.state.nameinfo
                         })
                     }>
                     <View style={{
@@ -79,7 +143,7 @@ class FlatListItem extends React.Component {
                         backgroundColor: 'white'
                     }}>
                         <Image
-                            source={{ uri: "data:image/png;base64, " + this.props.item.groupImage }}
+                            source={{ uri: "data:image/png;base64, " + this.state.avatar }}
                             style={{ width: 80, height: 80, margin: 5 }}>
                         </Image>
 
@@ -88,7 +152,7 @@ class FlatListItem extends React.Component {
                             flexDirection: 'column',
                             height: 80
                         }}>
-                            <Text style={styles.title}>{this.props.item.chatGrName}</Text>
+                            <Text style={styles.title}>{this.state.nameinfo}</Text>
                             <View style={{
                                 flex: 1,
                                 flexDirection: 'row',
@@ -143,13 +207,14 @@ export default class ListChat extends React.Component {
         const UserID = navigation.getParam('UserID');
 
         this.setState({ refreshing: true });
-        GetAllGroupResidentByUserID(UserID).then(res => {
-            let groups = JSON.parse(res);
-            this.setState({ data: groups });
-            this.setState({ refreshing: false });
+        GetAllGroupResidentByUserID(UserID)
+            .then(res => {
+                let groups = JSON.parse(res);
+                this.setState({ data: groups });
+                this.setState({ refreshing: false });
 
-            this.arrayholder = groups;
-        })
+                this.arrayholder = groups;
+            })
             .catch((error) => {
                 //this.setState({ data: [] });
                 this.setState({ refreshing: false });
@@ -174,12 +239,6 @@ export default class ListChat extends React.Component {
         });
     }
     render() {
-        const { navigation } = this.props;
-        const UserID = navigation.getParam('UserID');
-        const Token = navigation.getParam('Token');
-        const BuildingID = navigation.getParam('BuildingID');
-        const Image = navigation.getParam('Image');
-
         const WIDTH = Dimensions.get('window').width;
 
         return (

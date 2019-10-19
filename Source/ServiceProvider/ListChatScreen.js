@@ -1,8 +1,8 @@
 import React from 'react';
 import { Modal, RefreshControl, Button, StyleSheet, FlatList, Text, View, Vibration, TextInput, TouchableOpacity, Image } from 'react-native';
-import { GetInfoUserbyUserId, GetAllGroupProviderByUserID, GetNewestMessageByGroupID } from '../../APIs/APIclass';
+import { GetImageResidentbyUserID, GetInfoUserbyUserId, GetAllGroupProviderByUserID, GetNewestMessageByGroupID } from '../../APIs/APIclass';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { SearchBar } from'react-native-elements';
+import { SearchBar } from 'react-native-elements';
 import Swipeout from 'react-native-swipeout'
 
 import MenuButton from '../Component/MenuButton'
@@ -16,6 +16,7 @@ class FlatListItem extends React.Component {
             mess: "",
             datetime: "",
             guestName: "",
+            avatar: "",
         });
     }
     setModalVisible(visible) {
@@ -28,42 +29,51 @@ class FlatListItem extends React.Component {
 
         let id = new String(this.props.item.id);
         let guestID = new String(this.props.item.guestID);
-        
+
         GetInfoUserbyUserId(guestID, Token)
-        .then(response => {
-          if (response.toString() !== "false") {
-            let user = JSON.parse(response);
-            let guestName = new String(user.nameInfo);
-            this.setState({
-                guestName: guestName
-            });
-          }
-        });
+            .then(response => {
+                if (response.toString() !== "false") {
+                    let user = JSON.parse(response);
+                    let guestName = new String(user.nameInfo);
+                    let userid = new String(user.id);
 
-        GetNewestMessageByGroupID(id).then(res => {
-            if (res.toString() !== "false") {
-                let obj = JSON.parse(res);
-                let message = new String(obj.content);
+                    GetImageResidentbyUserID(userid).then(response => {
+                        if (response.toString() !== "false") {
+                            let avatar = new String(response);
 
-                let mess;
-                if(message.length > 23) {
-                    mess = message.substring(0,22) + "...";
-                }else{
-                    mess = message;
+                            this.setState({
+                                guestName: guestName,
+                                avatar: avatar,
+                            });
+                        }
+                    });
                 }
-                let dt = new Date(obj.datetime);
-                let datetime = dt.getHours() + ':' + dt.getMinutes() + "  " + dt.getDate() + "-" + dt.getMonth() + "-" + dt.getFullYear();
-                this.setState({
-                    mess: mess,
-                    datetime: datetime
-                });
-            } else {
-                //this.setState({ mess: "" });
-            }
-        })
-            .catch((error) => {
-                //this.setState({ mess: "" });
             });
+
+        // GetNewestMessageByGroupID(id).then(res => {
+        //     if (res.toString() !== "false") {
+        //         let obj = JSON.parse(res);
+        //         let message = new String(obj.content);
+
+        //         let mess;
+        //         if(message.length > 23) {
+        //             mess = message.substring(0,22) + "...";
+        //         }else{
+        //             mess = message;
+        //         }
+        //         let dt = new Date(obj.datetime);
+        //         let datetime = dt.getHours() + ':' + dt.getMinutes() + "  " + dt.getDate() + "-" + dt.getMonth() + "-" + dt.getFullYear();
+        //         this.setState({
+        //             mess: mess,
+        //             datetime: datetime
+        //         });
+        //     } else {
+        //         //this.setState({ mess: "" });
+        //     }
+        // })
+        //     .catch((error) => {
+        //         //this.setState({ mess: "" });
+        //     });
     }
 
     render() {
@@ -85,7 +95,7 @@ class FlatListItem extends React.Component {
                             NameInfo: NameInfo,
                             GroupChatID: this.props.item.id,
                             GroupChatName: this.props.item.chatGrName,
-                            GuestName : this.state.guestName,
+                            GuestName: this.state.guestName,
                         })
                     }>
                     <View style={{
@@ -95,7 +105,7 @@ class FlatListItem extends React.Component {
                         backgroundColor: 'white'
                     }}>
                         <Image
-                            source={{ uri: "data:image/png;base64, " + this.props.item.groupImage }}
+                            source={{ uri: "data:image/png;base64, " + this.state.avatar }}
                             style={{ width: 80, height: 80, margin: 5 }}>
                         </Image>
 
@@ -162,7 +172,7 @@ export default class ListChat extends React.Component {
             let groups = JSON.parse(res);
             this.setState({ data: groups });
             this.setState({ refreshing: false });
-            
+
             this.arrayholder = groups;
         })
             .catch((error) => {
@@ -247,17 +257,17 @@ export default class ListChat extends React.Component {
     }
 }
 const styles = StyleSheet.create({
-    img:{
+    img: {
         position: 'absolute',
         marginTop: 7,
         marginLeft: 5,
         width: 25,
         height: 25
     },
-    screenname:{
+    screenname: {
         //position: 'absolute',
         marginTop: 10,
-        marginLeft: 100,
+        marginLeft: 70,
         fontSize: 20,
     },
     title: {
