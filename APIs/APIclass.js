@@ -1,11 +1,22 @@
 const urlCore = 'http://bigprotech.vn:5001/api/';
 const urlChat = 'http://bigprotech.vn:5002/api/';
 
-//-----------------------------------Register Token
+//-----------------------------------Restful API with Token
 
 // POST
 async function RegisterToken(username, password) {
   var link = urlCore + 'login/RegisterToken?DomainName=Residential Communication Channel&Username=' + username + '&Password=' + password;
+  try {
+    let res = await fetch(link, {
+      method: 'POST',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function LoginTokenGetInfo(username, password) {
+  var link = urlCore + 'login/LoginTokenGetInfo?DomainName=Residential Communication Channel&Username=' + username + '&Password=' + password;
   try {
     let res = await fetch(link, {
       method: 'POST',
@@ -97,8 +108,56 @@ async function ListAllChatGroupsbyBuildingID(buildingid) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+async function GetInfoResident(buildingid, Token) {
+  var link = urlCore + 'User/GetInfoResident?BuildingID=' + buildingid + '&DomainName=Residential Communication Channel';
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer ' + Token
+      },
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+
+// PUT
+async function ChangePassword(username, password, newpassword, Token) {
+  var link = urlCore + 'user/ChangePassword?UserName=' + username + '&DomainName=Residential Communication Channel&Password=' + password + '&NewPassword=' + newpassword;
+  try {
+    let res = await fetch(link, {
+      method: 'PUT',
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer ' + Token
+      },
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function UpdateUserInfo(UserID, Email, PhoneNumber, NameInfo, Token) {
+  var link = urlCore + 'user/UpdateUserInfo?UserID=' + UserID + '&DomainName=Residential Communication Channel&Email=' + Email + '&PhoneNumber=' + PhoneNumber + '&NameInfo=' + NameInfo;
+  try {
+    let res = await fetch(link, {
+      method: 'PUT',
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer ' + Token
+      },
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 
 //-----------------------------------Chat
+
 // POST
 async function AddChatGroup(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID) {
   var link = urlChat + 'ChatGroup/AddChatGroup';
@@ -171,6 +230,31 @@ async function AddPrivateChatGroupSPtoResident(ChatGrName, Status, AdminGrID, Gr
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+async function AddPrivateChatGroupRestoRes(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID, Type) {
+  var link = urlChat + 'ChatGroup/AddPrivateChatGroupRestoRes';
+  try {
+    let res = await fetch(link, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        ChatGrName: ChatGrName,
+        Status: Status,
+        AdminGrID: AdminGrID,
+        GroupImage: GroupImage,
+        IsServiceGr: IsServiceGr,
+        BuildingID: BuildingID,
+        GuestID: GuestID,
+        Type: Type
+      })
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+
 async function AddGrMember(ChatGroupID, MemberID) {
   var link = urlChat + 'ChatGroupMember/AddGrMember?chatGroupID=' + ChatGroupID + '&MemberID=' + MemberID;
   try {
@@ -182,9 +266,21 @@ async function AddGrMember(ChatGroupID, MemberID) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+
 // GET
 async function GetSinglePrivateChatGroupbyGuestID(AdminID, BuildingID, GuestID) {
   var link = urlChat + 'ChatGroup/GetSinglePrivateChatGroupbyGuestID?AdminID=' + AdminID + '&BuildingID=' + BuildingID + '&GuestID=' + GuestID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function GetSinglePrivateChatGroupRestoRes(AdminID, GuestID) {
+  var link = urlChat + 'ChatGroup/GetSinglePrivateChatGroupRestoRes?AdminID=' + AdminID + '&GuestID=' + GuestID;
   try {
     let res = await fetch(link, {
       method: 'GET',
@@ -239,7 +335,7 @@ async function GetAllGroupProviderByUserID(userid) {
   }
 }
 async function ListAllGroupChatPublicinBuilding(BuildingID) {
-  var link = urlChat + 'ChatGroup/ListAllGroupChatPublicinBuilding?BuildingID' + BuildingID;
+  var link = urlChat + 'ChatGroup/ListAllGroupChatPublicinBuilding?BuildingID=' + BuildingID;
   try {
     let res = await fetch(link, {
       method: 'GET',
@@ -249,6 +345,7 @@ async function ListAllGroupChatPublicinBuilding(BuildingID) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+
 //-----------------------------------Resident
 
 // POST
@@ -274,8 +371,19 @@ async function ResidentBuildingRegister(userid, username, buildingid) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
-async function AddFeedback(Title, Context, Sender, Receiver, DatePost, Status, BuildingID) {
-  var link = urlChat + 'Feedback/AddFeedback?Title=' + Title + '&Context=' + Context + '&Sender=' + Sender + '&Receiver=' + Receiver + '&DatePost=' + DatePost + '&Status=' + Status + '&BuildingID=' + BuildingID;
+async function AddFeedback(Title, Context, Sender, Receiver, DatePost, Status, BuildingID, Room) {
+  var link = urlChat + 'Feedback/AddFeedback?Title=' + Title + '&Context=' + Context + '&Sender=' + Sender + '&Receiver=' + Receiver + '&DatePost=' + DatePost + '&Status=' + Status + '&BuildingID=' + BuildingID + '&Room=' + Room;
+  try {
+    let res = await fetch(link, {
+      method: 'POST',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function AddSubFeedback(Title, Context, Sender, Receiver, DatePost, Status, BuildingID, MainFeedbackID, Room) {
+  var link = urlChat + 'Feedback/AddSubFeedback?Title=' + Title + '&Context=' + Context + '&Sender=' + Sender + '&Receiver=' + Receiver + '&DatePost=' + DatePost + '&Status=' + Status + '&BuildingID=' + BuildingID + '&MainFeedbackID=' + MainFeedbackID + '&Room=' + Room;
   try {
     let res = await fetch(link, {
       method: 'POST',
@@ -290,19 +398,6 @@ async function AddResidentFollow(userid, providerid, buildingid) {
   try {
     let res = await fetch(link, {
       method: 'POST',
-    })
-    return await res.text();
-  } catch (error) {
-    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
-  }
-}
-
-// DELETE
-async function DeleteResidentFollow(userid, providerid, buildingid) {
-  var link = urlChat + 'ResidentFollow/DeleteResidentFollow?ResidentID=' + userid + '&ProviderID=' + providerid + '&BuildingID=' + buildingid;
-  try {
-    let res = await fetch(link, {
-      method: 'DELETE',
     })
     return await res.text();
   } catch (error) {
@@ -344,8 +439,19 @@ async function ListAllResidentFollowByResidentID(userid, buildingid) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
-async function ListAllFeedbackbyReceiverID(userid, buildingid) {
-  var link = urlChat + 'Feedback/ListAllFeedbackbyReceiverID?ReceiverID=' + userid + '&BuildingID=' + buildingid;
+async function ListAllFeedbackbySenderId(userid, buildingid) {
+  var link = urlChat + 'Feedback/ListAllFeedbackbySenderId?SenderID=' + userid + '&BuildingID=' + buildingid;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function ListAllMainFeedbackbySenderID(buildingid, userid) {
+  var link = urlChat + 'Feedback/ListAllMainFeedbackbySenderID?BuildingID=' + buildingid + '&SenderID=' + userid;
   try {
     let res = await fetch(link, {
       method: 'GET',
@@ -371,6 +477,84 @@ async function CheckedFollow(userid, providerid, buildingid) {
   try {
     let res = await fetch(link, {
       method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function GetSingleResidentbyId(userid) {
+  var link = urlChat + 'Resident/GetSingleResidentbyId/?ResidentID=' + userid;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function GetImageResidentbyUserID(userid) {
+  var link = urlChat + 'Resident/GetImageResidentbyUserID/?ResidentID=' + userid;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function ListAllResidentbyBuildingID(BuildingID) {
+  var link = urlChat + 'ResidentBuilding/ListAllResidentbyBuildingID/?BuildingID=' + BuildingID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function ListAllSubFeedbackbyMainFeedbackID(MainFeedbackID) {
+  var link = urlChat + 'Feedback/ListAllSubFeedbackbyMainFeedbackID/?MainFeedbackID=' + MainFeedbackID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+
+// UPDATE
+async function UpdateResident(UserID, ApartmentCode, Avatar) {
+  var link = urlChat + 'Resident/UpdateResident';
+  try {
+    let res = await fetch(link, {
+      method: 'PUT',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        ID: UserID,
+        ApartmentCode: ApartmentCode,
+        Image: Avatar
+      })
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+
+// DELETE
+async function DeleteResidentFollow(userid, providerid, buildingid) {
+  var link = urlChat + 'ResidentFollow/DeleteResidentFollow?ResidentID=' + userid + '&ProviderID=' + providerid + '&BuildingID=' + buildingid;
+  try {
+    let res = await fetch(link, {
+      method: 'DELETE',
     })
     return await res.text();
   } catch (error) {
@@ -490,6 +674,28 @@ async function UpdateProviderPost(PostID, Title, Description, Image, Status, Pro
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+async function UpdateProviderService(ProviderID, ServiceName, Description, CategoryID, Providerlevel, Image) {
+  var link = urlChat + 'Provider/UpdateProviderService';
+  try {
+    let res = await fetch(link, {
+      method: 'PUT',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        ID: ProviderID,
+        ServiceName: ServiceName,
+        Description: Description,
+        CategoryID: CategoryID,
+        Providerlevel: Providerlevel,
+        Image: Image
+      })
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 
 // DELETE
 async function DeleteProviderPost(PostID) {
@@ -506,11 +712,14 @@ async function DeleteProviderPost(PostID) {
 
 export {
   SignInResident, RegisterToken, GetUsersByUserName, ListAllBuildingbyResidentID, ListAllBuildingbyProviderID,
-  ListAllBuilding, ListAllProviderInfobyBuildingID, ListAllFeedbackbyReceiverID, AddFeedback, GetSingleAdminbyBuildingID,
+  ListAllBuilding, ListAllProviderInfobyBuildingID, ListAllFeedbackbySenderId, AddFeedback, GetSingleAdminbyBuildingID,
   ListAllProviderPostbyProviderIdInBuilding, ListAllResidentFollowByResidentID, ResidentBuildingRegister,
   ListAllResidentFollowByResident, CheckedFollow, AddResidentFollow, DeleteResidentFollow, GetNewestMessageByGroupID,
   ListAllChatGroupsbyBuildingID, ListAllGroupbyMemberID, AddProviderRegister, AddProviderPost, GetAllGroupForMember,
   GetSingleProviderPost, GetSingleProviderService, UpdateProviderPost, DeleteProviderPost, GetSinglePrivateChatGroupbyGuestID,
-  AddChatGroup, AddGrMember, AddPrivateChatGroup, GetUserbyUserId, GetInfoUserbyUserId, AddPrivateChatGroupSPtoResident, GetAllGroupResidentByUserID, GetAllGroupProviderByUserID,
-  ListAllGroupChatPublicinBuilding,
+  AddChatGroup, AddGrMember, AddPrivateChatGroup, GetUserbyUserId, GetInfoUserbyUserId, AddPrivateChatGroupSPtoResident,
+  GetAllGroupResidentByUserID, GetAllGroupProviderByUserID, UpdateUserInfo, ListAllGroupChatPublicinBuilding,
+  LoginTokenGetInfo, GetSingleResidentbyId, ChangePassword, UpdateProviderService, UpdateResident, GetImageResidentbyUserID,
+  ListAllResidentbyBuildingID, AddSubFeedback, ListAllSubFeedbackbyMainFeedbackID, AddPrivateChatGroupRestoRes,
+  GetSinglePrivateChatGroupRestoRes, GetInfoResident, ListAllMainFeedbackbySenderID
 };
