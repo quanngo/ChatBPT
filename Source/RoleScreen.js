@@ -14,29 +14,79 @@ class FlatListItem extends React.Component {
         const Description = navigation.getParam('Description');
         const IsRoles = navigation.getParam('IsRoles');
 
-        return (
-            <View>
-                <TouchableOpacity style={styles.btnSignin}
-                    onPress={() =>
-                        this.props.navigation.navigate(this.props.item.toString() + 'Building', {
-                            Username: Username,
-                            Password: Password,
-                            Token: Token,
-                            UserID: UserID,
-                            NameService: NameService,
-                            NameInfo: NameInfo,
-                            Description: Description,
-                            Role: this.props.item.toString(),
-                            IsRoles: IsRoles,
-                        })
-                    }>
-                    <TextInput
-                        style={styles.signinText} editable={false}>
-                        {this.props.item}
-                    </TextInput>
-                </TouchableOpacity>
-            </View>
-        )
+        if ("Resident" == this.props.item.toString()) {
+            return (
+                <View>
+                    <TouchableOpacity style={styles.btnSignin}
+                        onPress={() =>
+                            this.props.navigation.navigate(this.props.item.toString() + 'Building', {
+                                Username: Username,
+                                Password: Password,
+                                Token: Token,
+                                UserID: UserID,
+                                NameService: NameService,
+                                NameInfo: NameInfo,
+                                Description: Description,
+                                Role: this.props.item.toString(),
+                                IsRoles: IsRoles,
+                            })
+                        }>
+                        <TextInput
+                            style={styles.signinText} editable={false}>
+                            Cư dân
+                        </TextInput>
+                    </TouchableOpacity>
+                </View>
+            )
+        } else if ("ServiceProvider" == this.props.item.toString()) {
+            return (
+                <View>
+                    <TouchableOpacity style={styles.btnSignin}
+                        onPress={() =>
+                            this.props.navigation.navigate(this.props.item.toString() + 'Building', {
+                                Username: Username,
+                                Password: Password,
+                                Token: Token,
+                                UserID: UserID,
+                                NameService: NameService,
+                                NameInfo: NameInfo,
+                                Description: Description,
+                                Role: this.props.item.toString(),
+                                IsRoles: IsRoles,
+                            })
+                        }>
+                        <TextInput
+                            style={styles.signinText} editable={false}>
+                            Nhà cung cấp
+                        </TextInput>
+                    </TouchableOpacity>
+                </View>
+            )
+        } else if ("BuildingAdministrator" == this.props.item.toString()) {
+            return (
+                <View>
+                    <TouchableOpacity style={styles.btnSignin}
+                        onPress={() =>
+                            this.props.navigation.navigate(this.props.item.toString() + 'Building', {
+                                Username: Username,
+                                Password: Password,
+                                Token: Token,
+                                UserID: UserID,
+                                NameService: NameService,
+                                NameInfo: NameInfo,
+                                Description: Description,
+                                Role: this.props.item.toString(),
+                                IsRoles: IsRoles,
+                            })
+                        }>
+                        <TextInput
+                            style={styles.signinText} editable={false}>
+                            Ban quản trị
+                        </TextInput>
+                    </TouchableOpacity>
+                </View>
+            )
+        } 
     }
 }
 
@@ -52,7 +102,7 @@ export default class Role extends React.Component {
             data: [],
         });
     }
-    componentDidMount()  {
+    componentDidMount() {
         this._isMounted = true;
 
         if (this._isMounted) {

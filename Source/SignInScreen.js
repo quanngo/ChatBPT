@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Vibration, TextInput, TouchableOpacity, Touchab
 import AsyncStorage from '@react-native-community/async-storage';
 
 import { COLOR_CYAN_MEDIUM, COLOR_BLUE_LIGHT, COLOR_PINK, COLOR_PINK_LIGHT, COLOR_PINK_HEAVY } from './myColor'
-import { LoginTokenGetInfo, RegisterToken, GetSingleResidentbyId, GetSingleProviderService } from '../APIs/APIclass'
+import { LoginTokenGetInfo, GetSingleBuildingbySuperviorID, GetSingleResidentbyId, GetSingleProviderService } from '../APIs/APIclass'
 
 export default class SignIn extends React.Component {
   static navigationOptions = {
@@ -61,7 +61,7 @@ export default class SignIn extends React.Component {
               count += 1;
             }
           }
-  
+
           // Nếu chỉ có 1 role
           if (Role.length == 1) {
             let sRole = new String(Role);
@@ -70,6 +70,13 @@ export default class SignIn extends React.Component {
             }
             if (sRole == "ServiceProvider") {
               this.NavigateSP(username, password, userid, usernameInfo, token, sRole, sRole + 'Building', 0);
+            }
+            if (sRole == "BuildingAdministrator") {
+              this.Navigate_nonRole(username, password, userid, usernameInfo, token, sRole, sRole + 'Building', 0);
+            }
+            //if (sRole == "Supervisor") {
+            if (sRole == "supervior") {
+              this.Navigate_SV(username, password, userid, usernameInfo, token, sRole, 'HomepageSVdrawer', 0);
             }
           }
 
@@ -132,7 +139,43 @@ export default class SignIn extends React.Component {
       });
     this.setState({ role: [] });
   }
+  Navigate_nonRole(username, password, userID, usernameInfo, token, role, screen, IsRoles) {
+    this._storeData(username, password);
+    
+    this.props.navigation.navigate(screen, {
+      Username: username,
+      Password: password,
+      Token: token,
+      UserID: userID,
+      NameInfo: usernameInfo,
+      Role: role,
+      IsRoles: IsRoles,
+    });
+    this.setState({ role: [] });
+  }
+  Navigate_SV(username, password, userID, usernameInfo, token, role, screen, IsRoles) {
+    GetSingleBuildingbySuperviorID(userID)
+      .then(res => {
+        if (res.toString() !== "false") {
+          let sv = JSON.parse(res);
+          svBuildingID = new String(sv.superviorBuildingID);
 
+          this._storeData(username, password);
+
+          this.props.navigation.navigate(screen, {
+            Username: username,
+            Password: password,
+            Token: token,
+            UserID: userID,
+            NameInfo: usernameInfo,
+            Role: role,
+            IsRoles: IsRoles,
+            BuildingID: svBuildingID,
+          });
+        }
+      });
+    this.setState({ role: [] });
+  }
   _storeData = async (username, password) => {
     try {
       await AsyncStorage.setItem('Username', username)

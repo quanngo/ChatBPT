@@ -159,7 +159,7 @@ async function UpdateUserInfo(UserID, Email, PhoneNumber, NameInfo, Token) {
 //-----------------------------------Chat
 
 // POST
-async function AddChatGroup(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID) {
+async function AddChatGroup(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID, Type, pickCode) {
   var link = urlChat + 'ChatGroup/AddChatGroup';
   try {
     let res = await fetch(link, {
@@ -174,7 +174,34 @@ async function AddChatGroup(ChatGrName, Status, AdminGrID, GroupImage, IsService
         GroupImage: GroupImage,
         IsServiceGr: IsServiceGr,
         BuildingID: BuildingID,
-        GuestID: GuestID
+        GuestID: GuestID,
+        Type: Type,
+        pickCode: pickCode
+      })
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function AddPrivateChatGroupWithListMember(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID, Type, pickCode, ListMember) {
+  var link = urlChat + 'ChatGroup/AddPrivateChatGroupWithListMember?ListMember=' + ListMember;
+  try {
+    let res = await fetch(link, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        ChatGrName: ChatGrName,
+        Status: Status,
+        AdminGrID: AdminGrID,
+        GroupImage: GroupImage,
+        IsServiceGr: IsServiceGr,
+        BuildingID: BuildingID,
+        GuestID: GuestID,
+        Type: Type,
+        pickCode: pickCode
       })
     })
     return await res.text();
@@ -206,7 +233,7 @@ async function AddPrivateChatGroup(ChatGrName, Status, AdminGrID, GroupImage, Is
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
-async function AddPrivateChatGroupSPtoResident(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID, Type) {
+async function AddPrivateChatGroupSPtoResident(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID, Type, pickCode) {
   var link = urlChat + 'ChatGroup/AddPrivateChatGroupSPtoResident';
   try {
     let res = await fetch(link, {
@@ -222,7 +249,8 @@ async function AddPrivateChatGroupSPtoResident(ChatGrName, Status, AdminGrID, Gr
         IsServiceGr: IsServiceGr,
         BuildingID: BuildingID,
         GuestID: GuestID,
-        Type: Type
+        Type: Type,
+        pickCode: pickCode
       })
     })
     return await res.text();
@@ -230,7 +258,7 @@ async function AddPrivateChatGroupSPtoResident(ChatGrName, Status, AdminGrID, Gr
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
-async function AddPrivateChatGroupRestoRes(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID, Type) {
+async function AddPrivateChatGroupRestoRes(ChatGrName, Status, AdminGrID, GroupImage, IsServiceGr, BuildingID, GuestID, Type, pickCode) {
   var link = urlChat + 'ChatGroup/AddPrivateChatGroupRestoRes';
   try {
     let res = await fetch(link, {
@@ -246,7 +274,8 @@ async function AddPrivateChatGroupRestoRes(ChatGrName, Status, AdminGrID, GroupI
         IsServiceGr: IsServiceGr,
         BuildingID: BuildingID,
         GuestID: GuestID,
-        Type: Type
+        Type: Type,
+        pickCode: pickCode
       })
     })
     return await res.text();
@@ -254,7 +283,6 @@ async function AddPrivateChatGroupRestoRes(ChatGrName, Status, AdminGrID, GroupI
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
-
 async function AddGrMember(ChatGroupID, MemberID) {
   var link = urlChat + 'ChatGroupMember/AddGrMember?chatGroupID=' + ChatGroupID + '&MemberID=' + MemberID;
   try {
@@ -266,8 +294,30 @@ async function AddGrMember(ChatGroupID, MemberID) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+async function AddGrMemberToGroupbyPickCode(PickCode, listMemberID) {
+  var link = urlChat + 'ChatGroupMember/AddGrMemberToGroupbyPickCode?PickCode=' + PickCode + '&listMemberID=' + listMemberID;
+  try {
+    let res = await fetch(link, {
+      method: 'POST',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 
 // GET
+async function GetGroupChatbyPickCode(PickCode) {
+  var link = urlChat + 'ChatGroup/GetGroupChatbyPickCode?PickCode=' + PickCode;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 async function GetSinglePrivateChatGroupbyGuestID(AdminID, BuildingID, GuestID) {
   var link = urlChat + 'ChatGroup/GetSinglePrivateChatGroupbyGuestID?AdminID=' + AdminID + '&BuildingID=' + BuildingID + '&GuestID=' + GuestID;
   try {
@@ -382,8 +432,8 @@ async function AddFeedback(Title, Context, Sender, Receiver, DatePost, Status, B
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
-async function AddSubFeedback(Title, Context, Sender, Receiver, DatePost, Status, BuildingID, MainFeedbackID, Room) {
-  var link = urlChat + 'Feedback/AddSubFeedback?Title=' + Title + '&Context=' + Context + '&Sender=' + Sender + '&Receiver=' + Receiver + '&DatePost=' + DatePost + '&Status=' + Status + '&BuildingID=' + BuildingID + '&MainFeedbackID=' + MainFeedbackID + '&Room=' + Room;
+async function AddSubFeedback(Context, DatePost, Receiver, Sender , Status, BuildingID, MainFeedbackID, StatusHanding) {
+  var link = urlChat + 'Feedback/AddSubFeedback?&Context=' + Context + '&Sender=' + Sender + '&Receiver=' + Receiver + '&DatePost=' + DatePost + '&Status=' + Status + '&BuildingID=' + BuildingID + '&MainFeedbackID=' + MainFeedbackID + '&StatusHanding=' + StatusHanding;
   try {
     let res = await fetch(link, {
       method: 'POST',
@@ -461,6 +511,17 @@ async function ListAllMainFeedbackbySenderID(buildingid, userid) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+async function ListAllFeedbackbyReceiverID(userid, buildingid) {
+  var link = urlChat + 'Feedback/ListAllFeedbackbyReceiverID?ReceiverID=' + userid + '&BuildingID=' + buildingid;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 async function ListAllResidentFollowByResident(userid, buildingid) {
   var link = urlChat + 'ResidentFollow/ListAllResidentFollowByResidentID?ResidentID=' + userid + '&BuildingID=' + buildingid;
   try {
@@ -516,6 +577,17 @@ async function ListAllResidentbyBuildingID(BuildingID) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+async function GetSingleFeedbackbyFeedbackId(FeedbackID) {
+  var link = urlChat + 'Feedback/GetSingleFeedbackbyFeedbackId/?FeedBackID=' + FeedbackID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 async function ListAllSubFeedbackbyMainFeedbackID(MainFeedbackID) {
   var link = urlChat + 'Feedback/ListAllSubFeedbackbyMainFeedbackID/?MainFeedbackID=' + MainFeedbackID;
   try {
@@ -548,7 +620,20 @@ async function UpdateResident(UserID, ApartmentCode, Avatar) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
-
+async function UpdateStatusFeedback(FeedbackID, Status) {
+  var link = urlChat + 'Feedback/UpdateStatusFeedback?FeedBackID=' + FeedbackID + '&Status=' + Status;
+  try {
+    let res = await fetch(link, {
+      method: 'PUT',
+      headers: {
+        'Content-type': 'application/json',
+      },
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 // DELETE
 async function DeleteResidentFollow(userid, providerid, buildingid) {
   var link = urlChat + 'ResidentFollow/DeleteResidentFollow?ResidentID=' + userid + '&ProviderID=' + providerid + '&BuildingID=' + buildingid;
@@ -647,6 +732,17 @@ async function GetSingleProviderPost(postid) {
     alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
   }
 }
+async function GetImageSPbyUserID(UserID) {
+  var link = urlChat + 'Provider/GetImageSPbyUserID?ProviderID=' + UserID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
 
 // UPDATE
 async function UpdateProviderPost(PostID, Title, Description, Image, Status, ProviderID, Price, buildingID, Token) {
@@ -710,6 +806,94 @@ async function DeleteProviderPost(PostID) {
   }
 }
 
+//-----------------------------------Service Provider
+// POST
+
+// GET
+async function ListAllBuildingOfAdmin(userid) {
+  var link = urlChat + 'AdminBuilding/ListAllBuildingOfAdmin?ID=' + userid
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function GetBuildingbyAdminID(userid) {
+  var link = urlChat + 'AdminBuilding/GetBuildingbyAdminID?ID=' + userid
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function ListAllResidentBuildingRegister(BuildingID) {
+  var link = urlChat + 'ResidentBuildingRegister/ListAllRegisterMember?BuildingID=' + BuildingID;
+
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function ListAllProviderRegisterMember(BuildingID) {
+  var link = urlChat + 'RegisterMember/ListAllProviderRegisterMember?BuildingID=' + BuildingID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function ListAllResidentRegisterMember(BuildingID) {
+  var link = urlChat + 'RegisterMember/ListAllResidentRegisterMember?BuildingID=' + BuildingID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+
+//-----------------------------------Service Provider
+// POST
+
+// GET
+async function GetSingleBuildingbySuperviorID(userid) {
+  var link = urlChat + 'Supervior/GetSingleBuildingbySuperviorID?ID=' + userid;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+async function GetSingleSuperviorbyBuildingID(BuildingID) {
+  var link = urlChat + 'Supervior/GetSingleSuperviorbyBuildingID?BuildingID=' + BuildingID;
+  try {
+    let res = await fetch(link, {
+      method: 'GET',
+    })
+    return await res.text();
+  } catch (error) {
+    alert('Lỗi mạng! Xin kiểm tra lại đường truyền');
+  }
+}
+
 export {
   SignInResident, RegisterToken, GetUsersByUserName, ListAllBuildingbyResidentID, ListAllBuildingbyProviderID,
   ListAllBuilding, ListAllProviderInfobyBuildingID, ListAllFeedbackbySenderId, AddFeedback, GetSingleAdminbyBuildingID,
@@ -721,5 +905,9 @@ export {
   GetAllGroupResidentByUserID, GetAllGroupProviderByUserID, UpdateUserInfo, ListAllGroupChatPublicinBuilding,
   LoginTokenGetInfo, GetSingleResidentbyId, ChangePassword, UpdateProviderService, UpdateResident, GetImageResidentbyUserID,
   ListAllResidentbyBuildingID, AddSubFeedback, ListAllSubFeedbackbyMainFeedbackID, AddPrivateChatGroupRestoRes,
-  GetSinglePrivateChatGroupRestoRes, GetInfoResident, ListAllMainFeedbackbySenderID
+  GetSinglePrivateChatGroupRestoRes, GetInfoResident, ListAllMainFeedbackbySenderID, GetGroupChatbyPickCode,
+  GetBuildingbyAdminID, ListAllResidentBuildingRegister, ListAllBuildingOfAdmin, GetImageSPbyUserID,
+  AddGrMemberToGroupbyPickCode, UpdateStatusFeedback, ListAllProviderRegisterMember, ListAllResidentRegisterMember,
+  GetSingleBuildingbySuperviorID, GetSingleSuperviorbyBuildingID, AddPrivateChatGroupWithListMember,
+  GetSingleFeedbackbyFeedbackId, ListAllFeedbackbyReceiverID
 };
